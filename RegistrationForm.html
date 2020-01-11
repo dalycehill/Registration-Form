@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Registration Form</title>
+        <style>
+            .error {
+                color: red;
+                display: none;
+                font-weight: bold;
+            }
+        
+        </style>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script type="text/javascript">
+
+        //hide state/province dropdowns when page loads
+        $(document).ready(function() {
+                hide();
+
+                $("#country").change(function() { 
+                    var countryChange = $(this).val();
+                    
+                    //show state dropdown if USA; province dropdown if Canada
+                    if (countryChange == "USA") {
+                        showState();
+                        } else if (countryChange == "canada") {
+                            showProvince();
+                            }
+                
+                });
+                
+            });
+
+            function hide() {
+                $("#states").css("opacity", "0")
+                $("#provinces").css("opacity", "0")
+                $("#state").prop("disabled", true);
+                $("#province").prop("disabled", true);
+            }
+
+            function showState() {
+                $("#states").css("opacity", "1")
+                $("#state").prop("disabled", false);
+                $("#provinces").css("opacity", "0")
+            }
+
+            function showProvince() {
+                $("#provinces").css("opacity", "1")
+                $("#province").prop("disabled", false);
+                $("#states").css("opacity", "0")
+            }
+            
+            function submitForm() {
+                //variables
+                var title = $("#title").val();
+                var firstName = $("#firstName").val();
+                var lastName = $("#lastName").val();
+                var address1 = $("#address1").val();
+                var country = $("#country").val();
+                var state = $("#state").val();
+                var province = $("#province").val();
+                var email = $("#email").val();
+                var password = $("#password").val();
+                var passwordLength = password.length;
+                var password2 = $("#password2").val();
+
+                //error code
+                var error = 0;
+
+                if (title == "") {
+                    error = 1;
+                    $("#titleError").css("display", "inline");
+                    } else {
+                        $("#titleError").css("display", "none");
+                        }
+
+                if (firstName == "") {
+                    error = 2;
+                    $("#firstNameError").css("display", "inline");
+                    } else {
+                        $("#firstNameError").css("display", "none");
+                        }
+
+                if (lastName == "") {
+                    error = 3;
+                    $("#lastNameError").css("display", "inline");
+                    } else {
+                        $("#lastNameError").css("display", "none");
+                        }
+
+                if (address1 == "") {
+                    error = 4;
+                    $("#addressError").css("display", "inline");
+                    } else {
+                        $("#addressError").css("display", "none");
+                        }
+
+                if (country == "") {
+                    error = 5;
+                    $("#countryError").css("display", "inline");
+
+                    } else if (country == "USA") {
+                        $("#countryError").css("display", "none");
+                        $("#provinceError").css("display", "none");
+                        
+                        //if country is USA, make sure a state is selected
+                        if (state == "") {
+                            error = 6;
+                            $("#stateError").css("display", "inline");
+                            } else {
+                                $("#stateError").css("display", "none");
+                                }
+                       
+                        } else if (country == "canada") {
+                            $("#countryError").css("display", "none");
+                            $("#stateError").css("display", "none");
+
+                            //if country is Canada, make sure a province is selected
+                            if (province == "") {
+                                error = 7;
+                                $("#provinceError").css("display", "inline");
+                                } else {
+                                    $("#provinceError").css("display", "none");
+                                    }
+                            }   
+
+                if (email == "") {
+                    error = 8;
+                    $("#emailError").css("display", "inline");
+                    } else {
+                        $("#emailError").css("display", "none");
+                        } 
+                
+                if (password == "") {
+                    error = 9;
+                    $("#pwdError").css("display", "inline");
+
+                    //check if password is long enough
+                    } else if (passwordLength < 6) {
+                        error = 11;
+                        $("#pwdLengthError").css("display", "inline");   
+                        $("#pwdError").css("display", "none");
+                    
+                        } else {
+                            $("#pwdLengthError").css("display", "none");  
+                            $("#pwdError").css("display", "none");   
+                            }                
+
+                if (password2 == "") {
+                    error = 10;
+                    $("#pwd2Error").css("display", "inline");            
+                    $("#pwd2MatchError").css("display", "none");
+
+                    //check if passwords match
+                    } else if (password != password2) {
+                        error = 12;
+                        $("#pwd2MatchError").css("display", "inline");
+                        $("#pwd2Error").css("display", "none");
+
+                        } else {
+                            $("#pwd2Error").css("display", "none");
+                            $("#pwd2MatchError").css("display", "none");
+                            }
+
+                if (error == 0) {
+                    var dataString = sendToServer(title, firstName, lastName, address1, address2, address3, country, state, province, email, password, password2);
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/sendForm.php",
+                        data: dataString,
+                        success: function(msg) {
+                            if(msg != "") {
+                                alert(msg);
+                            }
+                        }
+                    });
+                }
+
+                function sendToServer(title, firstName, lastName, address1, address2, address3, country, state, province, email, password, password2) {
+                    var dataString = "title=" +title+ "&firstName=" +firstName+ "&lastName=" +lastName+ "&address1=" +address1+
+                                     "&address2=" +address2+ "&address3=" +address3+ "&country=" +country+ "&state=" +state+  
+                                     "&province=" +province+ "&email=" +email+ "&password=" +password+ "&password2=" +password2
+
+                    return dataString;
+                }
+            }
+
+        </script>
+    </head>
+
+    <body>
+        <h4>Required fields are marked with *</h5>
+        <form id="form1" name="form1" method="POST" action="javascript:submitForm();">
+            
+            <label for="title">Title*</label>
+            <select id="title" name="title">
+                <option value="">Please choose a title</option>
+                <option value="Mr">Mr</option>
+                <option value="Mrs">Mrs</option>
+                <option value="Ms">Ms</option>
+            </select>
+            <span id="titleError" class="error">*REQUIRED</span>
+            <br/>
+
+            <label for="firstName">First Name*</label>
+            <input type="text" id="firstName" name="firstName" value="" />
+            <span id="firstNameError" class="error">*REQUIRED</span>
+            <br/>
+
+            <label for="lastName">Last Name*</label>
+            <input type="text" id="lastName" name="lastName" value="" />
+            <span id="lastNameError" class="error">*REQUIRED</span>
+            <br/>
+
+            <label for="address1">Street Address*</label>
+            <input type="text" id="address1" name="address1" value="" />
+            <span id="addressError" class="error">*REQUIRED</span>
+            <br/>
+
+            <label for="address2">Address 2</label>
+            <input type="text" id="address2" name="address2" value="" />
+            <br/>
+
+            <label for="address3">Address 3</label>
+            <input type="text" id="address3" name="address3" value="" />
+            <br/>
+
+            <label for="country">Country*</label>
+            <select id="country" name="country">
+                <option value="">Please choose a country</option>
+                <option value="USA">USA</option>
+                <option value="canada">Canada</option>
+            </select>
+            <span id="countryError" class="error">*REQUIRED</span>
+            <br/>
+
+            <div id="states">
+                <label for="state">State*</label>
+                <select id="state" name="state">
+                    <option value="">Please choose a state</option>
+                    <option value="AL">Alabama</option>
+                    <option value="AK">Alaska</option>
+                    <option value="AZ">Arizona</option>
+                    <option value="AR">Arkansas</option>
+                    <option value="CA">California</option>
+                    <option value="CO">Colorado</option>
+                    <option value="CT">Connecticut</option>
+                    <option value="DE">Delaware</option>
+                    <option value="DC">District Of Columbia</option>
+                    <option value="FL">Florida</option>
+                    <option value="GA">Georgia</option>
+                    <option value="HI">Hawaii</option>
+                    <option value="ID">Idaho</option>
+                    <option value="IL">Illinois</option>
+                    <option value="IN">Indiana</option>
+                    <option value="IA">Iowa</option>
+                    <option value="KS">Kansas</option>
+                    <option value="KY">Kentucky</option>
+                    <option value="LA">Louisiana</option>
+                    <option value="ME">Maine</option>
+                    <option value="MD">Maryland</option>
+                    <option value="MA">Massachusetts</option>
+                    <option value="MI">Michigan</option>
+                    <option value="MN">Minnesota</option>
+                    <option value="MS">Mississippi</option>
+                    <option value="MO">Missouri</option>
+                    <option value="MT">Montana</option>
+                    <option value="NE">Nebraska</option>
+                    <option value="NV">Nevada</option>
+                    <option value="NH">New Hampshire</option>
+                    <option value="NJ">New Jersey</option>
+                    <option value="NM">New Mexico</option>
+                    <option value="NY">New York</option>
+                    <option value="NC">North Carolina</option>
+                    <option value="ND">North Dakota</option>
+                    <option value="OH">Ohio</option>
+                    <option value="OK">Oklahoma</option>
+                    <option value="OR">Oregon</option>
+                    <option value="PA">Pennsylvania</option>
+                    <option value="RI">Rhode Island</option>
+                    <option value="SC">South Carolina</option>
+                    <option value="SD">South Dakota</option>
+                    <option value="TN">Tennessee</option>
+                    <option value="TX">Texas</option>
+                    <option value="UT">Utah</option>
+                    <option value="VT">Vermont</option>
+                    <option value="VA">Virginia</option>
+                    <option value="WA">Washington</option>
+                    <option value="WV">West Virginia</option>
+                    <option value="WI">Wisconsin</option>
+                    <option value="WY">Wyoming</option>
+                </select>
+                <span id="stateError" class="error">*REQUIRED</span>
+                <br/>
+            </div>
+
+            <div id="provinces">
+                <label for="province">Province*</label>
+                <select id="province" name="province">
+                    <option value="">Please choose a province</option>
+                    <option value="AB">Alberta</option>
+                    <option value="BC">British Columbia</option>
+                    <option value="MB">Manitoba</option>
+                    <option value="NB">New Brunswick</option>
+                    <option value="NL">Newfoundland and Labrador</option>
+                    <option value="NS">Nova Scotia</option>
+                    <option value="ON">Ontario</option>
+                    <option value="PE">Prince Edward Island</option>
+                    <option value="QC">Quebec</option>
+                    <option value="SK">Saskatchewan</option>
+                    <option value="NT">Northwest Territories</option>
+                    <option value="NU">Nunavut</option>
+                    <option value="YT">Yukon</option>
+                </select>
+                <span id="provinceError" class="error">*REQUIRED</span>
+                <br/><br/>
+            </div>
+
+            <label for="email">Email*</label>
+            <input type="email" id="email" name="email" value="" />
+            <span id="emailError" class="error">*REQUIRED</span>
+            <br/>
+
+            <label for="password">Password*</label>
+            <input type="password" id="password" name="password" value="" /> 
+            <span id="pwdError" class="error">*REQUIRED</span>
+            <span id="pwdLengthError" class="error">*MUST BE AT LEAST 6 CHARACTERS</span>
+            <br/>
+
+            <label for="password2">Confirm Password*</label>
+            <input type="password" id="password2" name="password2" value="" /> 
+            <span id="pwd2Error" class="error">*REQUIRED</span>
+            <span id="pwd2MatchError" class="error">*PASSWORDS MUST MATCH</span>
+            <br/>
+
+            <input type="submit" name="submit" value="Submit" />
+            
+        </form>
+    </body>
+</html>
